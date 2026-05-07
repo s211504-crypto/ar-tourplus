@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SS40B AR Navigation</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #000; }
+        
+        /* 載入中動畫 */
+        #scanning-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7) url('https://i.gifer.com/ZZ5H.gif') center 30% no-repeat;
+            background-size: 80px; z-index: 999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: #00FFFF;
+        }
+
+        /* 技術詳解面板 */
+        .ar-panel {
+            position: fixed; top: 10%; left: 5%; width: 90%; max-height: 80%;
+            background: rgba(10, 25, 47, 0.95); border: 2px solid #00FFFF;
+            border-radius: 15px; z-index: 1000; display: none;
+            flex-direction: column; padding: 20px; box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); overflow-y: auto;
+        }
+
+        .section-title { color: #00FFFF; font-size: 1.2em; border-bottom: 1px solid #334; margin: 15px 0 5px 0; font-weight: bold; }
+        .content-text { color: #E0E0E0; font-size: 0.95em; line-height: 1.6; }
+        .close-btn { 
+            background: #00FFFF; color: #000; border: none; padding: 12px;
+            border-radius: 8px; margin-top: 20px; font-weight: bold; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scanning-overlay">
+        <p style="margin-top: 150px;">正在啟動 SS40B AR 系統...</p>
+        <p style="font-size: 0.8em; color: #888;">請對準 100cm 裝置正面紋理</p>
+    </div>
+
+    <div id="tech-panel" class="ar-panel">
+        <div class="section-title">🏛️ 歷史意義與美學</div>
+        <div class="content-text">以「青花瓷」外殼代表海上絲綢之路，融合傳統工藝與環保竹材。</div>
+        
+        <div class="section-title">👁️ AI 視覺互動</div>
+        <div class="content-text">整合 KOI 模組手勢識別：張開手掌啟動模擬航行，握緊拳頭執行緊急中止。</div>
+        
+        <div class="section-title">⚙️ 動力與工程結構</div>
+        <div class="content-text">利用 Pepper's Ghost 實現文物懸浮，結合「四邊形網格結構」確保 100cm 大型裝置穩定。</div>
+        
+        <div class="section-title">📡 智能管理系統</div>
+        <div class="content-text">遠端雲端監控與環境光自適應 LED 調節功能。</div>
+        
+        <button class="close-btn" onclick="closePanel()">返回掃描</button>
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.001; filterBeta: 10;" 
+             embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="far: 10000; objects: .clickable"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0" id="target-anchor">
+            <a-torus-knot color="#00FFFF" radius="0.2" radius-tubular="0.01" 
+                          animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"></a-torus-knot>
+            <a-text value="SS40B DETECTED" align="center" color="#00FFFF" position="0 0.5 0" width="3"></a-text>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        const techPanel = document.querySelector('#tech-panel');
+        const overlay = document.querySelector('#scanning-overlay');
+        const target = document.querySelector('#target-anchor');
+
+        // 當系統準備好開始掃描時，隱藏 Loading
+        document.querySelector('a-scene').addEventListener('arReady', () => {
+            overlay.style.background = "none";
+            overlay.querySelector('p').innerText = "請對準作品...";
+        });
+
+        // 偵測成功
+        target.addEventListener("targetFound", () => {
+            techPanel.style.display = 'flex';
+            overlay.style.display = 'none';
+        });
+
+        function closePanel() {
+            techPanel.style.display = 'none';
+            overlay.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
